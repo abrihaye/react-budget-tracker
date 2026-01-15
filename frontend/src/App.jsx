@@ -13,9 +13,12 @@ function App() {
     
     try {
       const response = await fetch('http://localhost:3000/budget')
-    };
+      
+    } catch(error) {
+      console.error(error);
+    }
 
-  }
+  };
 
   useEffect(() => {
     // Define an async function (Task)
