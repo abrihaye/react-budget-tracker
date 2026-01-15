@@ -1,21 +1,34 @@
 import {useState, useEffect} from 'react';
 
 function App() {
-  const [ledger, ledgerSet] = useState([]);
+  const [ledger, setLedger] = useState([]);
 
   const [newItem, setNewItem] = useState("");
   const [newAmount, setNewAmount] = useState("");
 
   const handleSave = async () => {
-    if(!newItem || !newCost) return;
+
+    if(!newItem || !newAmount) return;
     
-    const entry = {item: newItem, amount: newAmount};
+    const entry = {description: newItem, amount: newAmount};
     
     try {
-      const response = await fetch('http://localhost:3000/budget')
-      
+      const response = await fetch('http://localhost:3000/budget', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(entry)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      } else {
+        setLedger([...ledger, entry]);
+        setNewItem("");
+        setNewAmount("");
+      }
+
     } catch(error) {
-      console.error(error);
+      console.error(error.name, error.message);
     }
 
   };
@@ -32,7 +45,7 @@ function App() {
         
         // 3. Update State (Back to main thread)
         console.log("Data received:", data);
-        ledgerSet(data);
+        setLedger(data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
