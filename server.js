@@ -3,7 +3,7 @@ const http = require('http');
 
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.url === '/budget') {
@@ -44,7 +44,29 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify({status : "Saved"}));
                 })
                 break;
+            case 'DELETE':
+                let deleteBody = '';
+                console.log("localhost:3000/budget DELETE received");
+                req.on('data', (chunk) => {deleteBody += chunk;})
+                
+                req.on('end', () => {
+
+                    const target = JSON.parse(deleteBody);
+
+                    let currentLedger = [];
+                    if (fs.existsSync('ledger.json'))
+                    {
+                        currentLedger = JSON.parse(fs.readFileSync('ledger.json'));
+                    }
+                    const newLedger = currentLedger.filter((item) => item.id != target.id);
+                    const data = JSON.stringify(newLedger, null, 2);
+
+                    fs.writeFileSync('ledger.json', data); 
+                    res.end(JSON.stringify({status : "Deleted"}));
+                })
+                break;
             default:
+                console.log(req.method)
                 console.log("Sorry, out of method range");
         }
         

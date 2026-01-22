@@ -10,7 +10,7 @@ function App() {
 
     if(!newItem || !newAmount) return;
     
-    const entry = {description: newItem, amount: newAmount};
+    const entry = {description: newItem, amount: newAmount, id: crypto.randomUUID()};
     
     try {
       const response = await fetch('http://localhost:3000/budget', {
@@ -30,6 +30,26 @@ function App() {
     } catch(error) {
       console.error(error.name, error.message);
     }
+
+  };
+
+  const handleDelete = async (itemId) => {
+    // itemId is the transaction number to delete
+    try {
+      const response = await fetch('http://localhost:3000/budget', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: itemId})
+      });
+
+      if(!response.ok) {
+        throw new Error('Response status : {response.status}');
+      } else {
+        setLedger(ledger.filter((entry) => entry.id != itemId));
+      }
+    } catch(error) {
+      console.error(error.name, error.message);
+    };
 
   };
 
@@ -78,8 +98,9 @@ function App() {
 
       {/* 3. Dump the memory to screen for debugging */}
       <ul> {ledger.map((entry, index) => (
-        <li key={index}>
+        <li key={entry.id}>
           {entry.description}: <b>${entry.amount}</b>
+          <button onClick={() => handleDelete(entry.id)}>Delete</button>
         </li>
       ))}
       </ul>
